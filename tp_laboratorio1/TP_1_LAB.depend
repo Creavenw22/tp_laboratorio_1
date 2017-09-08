@@ -1,0 +1,19 @@
+# depslib dependency file v1.0
+1491599575 source:c:\users\creaven\desktop\programacion\tp_laboratorio_1-master\funciones.c
+
+1491600605 source:c:\users\creaven\desktop\programacion\tp_laboratorio_1-master\main.c
+	<stdio.h>
+	<stdlib.h>
+	"funciones.h"
+
+1491598619 c:\users\creaven\desktop\programacion\tp_laboratorio_1-master\funciones.h
+
+1496443038 source:c:\users\alumno\desktop\utn\tp_laboratorio_1-master\tp_laboratorio_1-old\tp_laboratorio1\funciones.c
+
+1496443038 source:c:\users\alumno\desktop\utn\tp_laboratorio_1-master\tp_laboratorio_1-old\tp_laboratorio1\main.c
+	<stdio.h>
+	<stdlib.h>
+	"funciones.h"
+
+1496443038 c:\users\alumno\desktop\utn\tp_laboratorio_1-master\tp_laboratorio_1-old\tp_laboratorio1\funciones.h
+
