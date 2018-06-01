@@ -159,7 +159,6 @@ void borrarPelicula(EMovie* movie,int max)
 {
     int i;
     int returnAux=0;
-    char titulo[51];
     int auxid;
     char opcion;
 
