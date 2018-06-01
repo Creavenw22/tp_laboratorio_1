@@ -1,325 +1,477 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <conio.h>
 #include "funciones.h"
 
-int menu (void)
+void menu(int cant)
 {
-    int opcion;
-
-    system("cls");
-    printf("**Menu de opciones**\n\n");
-    printf("1. Agregar pelicula\n");
-    printf("2. Modificar pelicula\n");
-    printf("3. Borrar pelicula\n");
-    printf("4. Generar pagina web\n");
-    printf("5. Salir\n\n");
-
+    printf("\nHay %d peliculas cargadas.\n\n",cant);
+    printf("1-Agregar pelicula\n");
+    printf("2-Borrar pelicula\n");
+    printf("3-Modificar Pelicula\n");
+    printf("4-Generar pagina web\n");
+    printf("5-Salir\n\n");
     printf("Ingrese una opcion: ");
-    fflush(stdin);
-    scanf("%d", &opcion);
 
-    return opcion;
 }
 
-
-void altaPelicula(eMovie* pelicula)
+int cargarPelicula(EMovie* movie,int max)
 {
-    FILE *BD;
-    int flag = 0;
-    char seguir;
-    eMovie* pAux;
+    int returnAux=0;
+    char titulo[51];
+    char genero[41];
+    int duracion;
+    char descripcion[2000];
+    int puntaje;
+    char imagen[500];
+    int estado;
+    int i;
+    int bandera=1;
 
-    pAux = pelicula;
-
-    do
+    if(bandera==0)
     {
-        system("cls");
-
-        if(flag == 0)
-        {
-            pAux = malloc(sizeof(eMovie));
-            pAux = calloc(10, sizeof(eMovie));
-
-            if(pAux == NULL)
+        inicializarEstados(movie,max);
+        inicializarIDs(movie,max);
+        bandera=1;
+    }
+    if(bandera==1)
+    {
+        if(!getStringAlfaNumerico("\n\nIngrese titulo: \n\n",titulo))
             {
-                system("cls");
-                printf("ERROR TIPO 1, NO SE PUDO ALOJAR MEMORIA");
-                exit(1);
+                printf("\n\n\n\t\t\t\t\t~El titulo ingresado debe tener solo letras o numeros~\n\n\n\n");
+                system("pause");
+                return returnAux;
+            }
+        if(!getStringLetras("\n\nIngrese genero: \n\n",genero))
+            {
+                printf("\n\n\n\t\t\t\t\t~El genero ingresado debe tener solo letras~\n\n\n\n");
+                system("pause");
+                return returnAux;
             }
 
-            flag = 1; //el flag permite que la primera vuelta se aloje memoria por primera vez, y a partir de la segunda vuelta se REaloje memoria
+        /*char arrayDuracion[50];
 
-        }
+        if(!getStringNumeros("\n\nIngrese duracion (en minutos): \n\n",arrayDuracion));
+            {
+                printf("\n\n\n\t\t\t\t\t~La duracion ingresado debe tener solo numeros~\n\n\n\n");
+                system("pause");
+                return returnAux;
+            }
 
-        printf("Ingrese titulo:\n");
+        duracion=atoi(arrayDuracion);
+        */
+
+        printf("\n\nIngrese duracion (en minutos): \n\n");
+        scanf("%d",&duracion);
+
+
+
+        if(!getStringAlfaNumerico("\n\nIngrese descripcion: (max: 2000 char.)\n\n",descripcion))
+            {
+                printf("\n\n\n\t\t\t\t\t~El la descripcion ingresada debe tener solo letras o numeros~\n\n\n\n");
+                system("pause");
+                return returnAux;
+            }
+
+        /*char arrayPuntaje[50];
+
+        if(!getStringNumeros("Ingrese puntaje (0/100): \n\n",arrayPuntaje));
+            {
+                printf("\n\n\n\t\t\t\t\t~EL puntaje ingresado debe tener solo numeros~\n\n\n\n");
+                system("pause");
+                return returnAux;
+            }
+
+        puntaje=atoi(arrayPuntaje);*/
+
+         printf("\n\nIngrese puntaje (0/100): \n\n");
+        scanf("%d",&puntaje);
+
+        printf("ingrese el Link a la imagen: ");
         fflush(stdin);
-        gets(pAux->titulo);
-
-        printf("Ingrese genero:\n");
-        fflush(stdin);
-        gets(pAux->genero);
-
-        printf("Ingrese duracion: (hh:mm)\n");
-        fflush(stdin);
-        gets(pAux->duracion);
-
-        printf("Ingrese descripcion:\n");
-        fflush(stdin);
-        gets(pAux->descripcion);
-
-        printf("Ingrese puntaje: (0 a 100)\n");
-        scanf("%f", &pAux->puntaje);
-
-        printf("Ingrese link de imagen:\n");
-        fflush(stdin);
-        gets(pAux->linkImagen);
-
-        pAux->state = 1;
-
-
-        printf("\n\nDesea seguir? s/n:");
-        fflush(stdin);
-        seguir = getch();
-
-        if((BD = fopen("BaseDatos.txt", "wb")) == NULL) //crea archivo binario de base de datos
+        gets(imagen);
+        estado=1;
+        for(i=0;i<max;i++)
         {
-            BD = fopen("BaseDatos.txt", "ab");
+            if((movie+i)->estado==0)
+            {
+                agregarPelicula((movie+i),titulo,genero,duracion,descripcion,puntaje,imagen,estado);
+                crearArchivo(movie,max);
+                returnAux=1;
+                break;
+            }
         }
-
-        fflush(stdin);
-        fseek(BD, 0L, SEEK_END);
-        fwrite(&pAux, sizeof(eMovie), 1, BD);
-
-        fclose(BD);
-
     }
-    while(seguir == 's' || seguir == 'S');
+    return returnAux;
+}
+void inicializarEstados(EMovie* movie,int max)
+{
+    int i;
+    for(i=0;i<max;i++)
+    {
+        (movie+i)->estado=0;
+    }
+}
 
+void inicializarIDs(EMovie* movie,int max)
+{
 
-
+    for(int i=0;i<max;i++)
+    {
+        (movie+i)->id=i+1;
+    }
 
 }
 
-void bajaPelicula(eMovie* pelicula)
+void agregarPelicula(EMovie* movie,char titulo[],char genero[],int duracion,char descripcion[],int puntaje,char imagen[],int estado)
 {
-    FILE *BD;
-    char Aux[50];
-    eMovie *auxPel;
-    char decision;
-    int flag = 0;
-    int flag1 = 0;
-    int cont = 0;
 
-    auxPel = pelicula;
+    strcpy(movie->titulo,titulo);
+    strcpy(movie->genero,genero);
+    movie->duracion=duracion;
+    strcpy(movie->descripcion,descripcion);
+    movie->puntaje=puntaje;
+    strcpy(movie->imagen,imagen);
+    movie->estado=estado;
+}
+void crearArchivo(EMovie* movie,int max)
+{
+    FILE* pFile;
+    int i;
 
-    system("cls");
-
-    if((BD = fopen("BaseDatos.txt", "rb")) == NULL) //crea archivo binario de base de datos
-    {
-        printf("Error, no existe base de datos!\n\n\n");
-        system("pause");
-    }
-    else
-    {
-        flag1 = 1;
-    }
-
-    if(flag1 == 1)
-    {
-
-        printf("Ingrese titulo de pelicula a dar de baja: ");
-        fflush(stdin);
-        gets(Aux);
-
-        rewind(BD);
-
-
-        while(!feof(BD))
-        {
-            fseek(BD, cont, SEEK_CUR);
-            fread(auxPel, sizeof(eMovie), 1, BD);
-
-            if(strcmp(Aux, auxPel->titulo) == 0 && auxPel->state == 1)
+            pFile=fopen("peliculas.dat","wb");
+            if(pFile!=NULL)
             {
-
-                flag = 1;
-                printf("Está seguro que desea realizar la baja? s/n");
-                fflush(stdin);
-                decision = getch();
-
-                if(decision == 's' || decision == 'S')
+                for(i=0;i<max;i++)
                 {
-                    printf("Accion completada!");
-                    auxPel->state = 0;
-
+                    if((movie+i)->estado==1)
+                    {
+                        fwrite((movie+i),sizeof(EMovie),1,pFile);
+                    }
                 }
-                else
-                {
-                    printf("Accion cancelada!");
-                }
-
-
             }
             else
             {
-                cont++;
+                printf("No se pudo generar el archivo.\n");
+                system("pause");
             }
+            fclose(pFile);
 
-
-        }
-
-        if(flag == 0)
-        {
-            printf("Error, no se encontro pelicula!\n\n");
-            system("pause");
-        }
-
-    }
 }
-
-
-void modPelicula(eMovie* pelicula)
+void borrarPelicula(EMovie* movie,int max)
 {
-    FILE *BD;
-    char Aux[50];
-    eMovie *auxPel;
-    int flag = 0;
-    int flag1 = 0;
-    int cont = 0;
-    int opcion;
+    int i;
+    int returnAux=0;
+    char titulo[51];
+    int auxid;
+    char opcion;
 
-    system("cls");
-
-    if((BD = fopen("BaseDatos.txt", "rb")) == NULL) //crea archivo binario de base de datos
-    {
-        printf("Error, no existe base de datos!\n\n\n");
-        system("pause");
-    }
-    else
-    {
-        flag1 = 1;
-    }
-
-    if(flag1 == 1)
-    {
-
-        printf("Ingrese titulo de pelicula a modificar: ");
-        fflush(stdin);
-        gets(Aux);
-
-        rewind(BD);
-
-        while(!feof(BD))
+        for(i=0;i<max;i++)
         {
-            fseek(BD, cont, SEEK_CUR);
-            fread(auxPel, sizeof(eMovie), 1, BD);
-
-            if(strcmp(Aux, auxPel->titulo) == 0 && auxPel->state == 1)
+            if((movie+i)->estado==1)
             {
-                if(strcmp(Aux, auxPel->titulo) == 0)
+                printf("PELICULAS:\n\n");
+                for(i=0;i<max;i++)
                 {
-                    printf("\n\nIngrese opcion a modificar:\n\n");
-                    printf("1. Titulo\n2. Genero\n3. Duracion\n4. Descripcion\n5. Puntaje\n6. Link de Imagen\n\nIngrese opcion: ");
-                    scanf("%d", &opcion);
-
-                    switch(opcion)
+                    if((movie+i)->estado==1)
                     {
-                    case 1:
-                        printf("Ingrese nuevo titulo: ");
+                        printf("ID: %d\tTitulo:  %s\n",(movie+i)->id,(movie+i)->titulo);
+                    }
+                }
+
+                printf("\n\nIngrese el id de la pelicula: ");
+                scanf("%d",&auxid);
+                for(i=0;i<max;i++)
+                {
+                    if((movie+i)->id==auxid)
+                    {
+                        printf("Pelicula:  %s\n\n",(movie+i)->titulo);
+                        printf("Desea Borrar la pelicula (s/n): ");
                         fflush(stdin);
-                        gets(auxPel->titulo);
-                        break;
-                    case 2:
-                        printf("Ingrese nuevo genero: ");
-                        fflush(stdin);
-                        gets(auxPel->genero);
-                        break;
-                    case 3:
-                        printf("Ingrese nueva duracion: ");
-                        fflush(stdin);
-                        gets(auxPel->duracion);
-                        break;
-                    case 4:
-                        printf("Ingrese nuvea descripcion: ");
-                        fflush(stdin);
-                        gets(auxPel->descripcion);
-                        break;
-                    case 5:
-                        printf("Ingrese nuevo puntaje: ");
-                        fflush(stdin);
-                        scanf("%f", &auxPel->puntaje);
-                        break;
-                    case 6:
-                        printf("Ingrese nuevo link de imagen: ");
-                        fflush(stdin);
-                        gets(auxPel->linkImagen);
-                        break;
-                    default:
-                        printf("\nError, opcion no valida!");
+                        opcion = tolower(getch());
+
+                        if(opcion=='s')
+                        {
+                            (movie+i)->estado=0;
+                            printf("\nTitulo eliminado con exito!.\n\n");
+
+                        }
+                        else
+                        {
+                            printf("\n\nse cancelo la baja.\n\n");
+                            system("pause");
+                        }
+                        returnAux=1;
                         break;
                     }
+                }
+            break;
+            }
+        }
 
-                    system("cls");
-                    printf("Modificacion realizada con exito");
-                    system("pause");
+        if (returnAux==1)
+        {
+            crearArchivo(movie,max);
+        }
+        system("pause");
+        system("cls");
+}
+void modificarPelicula(EMovie* movie,int max)
+{
+    int i;
+    int returnAux=0;
+    char tituloModificar[51];
+    char opcion;
+    char titulo[51];
+    char genero[41];
+    int duracion;
+    char descripcion[2000];
+    int puntaje;
+    char imagen[500];
+    int estado;
+
+        for(i=0;i<max;i++)
+        {
+            if((movie+i)->estado==1)
+            {
+                printf("PELICULAS:\n\n");
+                for(i=0;i<max;i++)
+                {
+                    if((movie+i)->estado==1)
+                    {
+                        printf("Titulo: %s\n",(movie+i)->titulo);
+                    }
                 }
 
-            }
-            else
-            {
-                cont++;
-            }
+                printf("\n\nIngrese el titulo: ");
+                fflush(stdin);
+                gets(tituloModificar);
+                for(i=0;i<max;i++)
+                {
+                    if(strcmp((movie+i)->titulo,tituloModificar)==0)
+                    {
+                        printf("Pelicula:  %s\n\n",(movie+i)->titulo);
+                        printf("Desea modificar la pelicula (s/n): ");
+                        fflush(stdin);
+                        opcion = tolower(getch());
 
+                        if(opcion=='s')
+                        {
+                            printf("Ingrese titulo: ");
+                            fflush(stdin);
+                            gets(titulo);
+                            printf("Ingrese genero: ");
+                            fflush(stdin);
+                            gets(genero);
+                            printf("Ingrese duracion (minutos): ");
+                            scanf("%d",&duracion);
+                            printf("Ingrese descripcion: ");
+                            fflush(stdin);
+                            gets(descripcion);
+                            printf("Ingrese puntaje: ");
+                            scanf("%d",&puntaje);
+                            printf("ingrese el Link a la imagen: ");
+                            fflush(stdin);
+                            gets(imagen);
+                            estado=1;
+                            agregarPelicula((movie+i),titulo,genero,duracion,descripcion,puntaje,imagen,estado);
+                            returnAux=1;
+                            crearArchivo(movie,max);
+                            printf("\nTitulo modificado con exito!.\n\n");
 
+                        }
+                        else
+                        {
+                            printf("\n\nse cancelo la modificacion.\n\n");
+                            system("pause");
+                        }
+                        returnAux=1;
+                        break;
+                    }
+                }
+            break;
+            }
         }
 
-        if(flag == 0)
+        if (returnAux==1)
         {
-            printf("Error, no se encontro pelicula!\n\n");
-            system("pause");
+            crearArchivo(movie,max);
         }
-
+}
+void crearPagina(EMovie* movie, int cantidadPeliculas)
+{
+    FILE* miArchivoHTML;
+    char nombre[20];
+    int i;
+    int j,q;
+    int auxInt=0;
+    char auxCadena[268];
+    char segundoAuxiliarCadena[268];
+    printf("Ingrese nombre de la pagina: ");
+    fflush(stdin);
+    gets(nombre);
+    strcat(nombre,".html");
+    miArchivoHTML=fopen(nombre,"w");
+    if(miArchivoHTML==NULL)
+    {
+        printf("La pagina no se va a poder generar.");
     }
+    else
+    {
 
+        for(i=0;i<cantidadPeliculas;i++)
+        {
+            //imagen class='img-responsive img rounded'
+            fprintf(miArchivoHTML,"<img  src=%s alt=%s style=width:200px;hight:200px>",(movie+i)->imagen,(movie+i)->titulo);
+
+            //titulo
+            fprintf(miArchivoHTML,"<h2><a href=#>%d)%s</a></h2>",i+1,(movie+i)->titulo);
+
+            //otros aspectos
+
+            fprintf(miArchivoHTML,"<h4><li> Genero: %s</li>   <li>Puntaje: %d </li>     <li>Duracion: %d </li>               </h4>",(movie+i)->genero,(movie+i)->puntaje,(movie+i)->duracion);
+            fprintf(miArchivoHTML,"<pre>");
+            strcpy(auxCadena,(movie+i)->descripcion);
+            q=0;
+            for(j=0;j<268;j++)
+            {
+                segundoAuxiliarCadena[j]=auxCadena[q];
+                q++;
+                if(j==60||j==124||j==188)
+                {
+                    j++;
+                    segundoAuxiliarCadena[j]='<';
+                    j++;
+                    segundoAuxiliarCadena[j]='b';
+                    j++;
+                    segundoAuxiliarCadena[j]='r';
+                    j++;
+                    segundoAuxiliarCadena[j]='>';
+
+                }
+            }
+            auxInt=strlen(segundoAuxiliarCadena);
+            fwrite(&segundoAuxiliarCadena,sizeof(char),auxInt,miArchivoHTML);
+            fprintf(miArchivoHTML,"</pre>");
+        }
+        fprintf(miArchivoHTML,"</html> </body>");
+    }
+    fclose(miArchivoHTML);
+    printf("La pagina se genero correctamente.\n");
 }
 
-void generaWeb(eMovie* pelicula)
+
+int noVoid(char str[])
 {
-    FILE *BD;
-    eMovie* Aux;
-
-    BD = fopen("BaseDatos.html", "w");
-
-    fread(&Aux, sizeof(eMovie), 1, BD);
-
-    fprintf(BD, "</a> <h3><a href='#'>");
-    fprintf(BD, "Titulo: ");
-    fprintf(BD, pelicula->titulo); //TITULO
-    fprintf(BD, "</a> </h3> <ul>");
-    fprintf(BD, "<li>");
-    fprintf(BD, "Género:"); //GENERO
-    fprintf(BD, pelicula->genero);
-    fprintf(BD, "</li>");
-    fprintf(BD, "<li>");
-    fprintf(BD, "Puntaje: "); //PUNTAJE
-    fprintf(BD, &pelicula->puntaje);
-    fprintf(BD, "</li>");
-    fprintf(BD, "<li>");
-    fprintf(BD, "Duración: "); //DURACION
-    fprintf(BD, pelicula->duracion);
-    fprintf(BD, "</li> </ul>");
-    fprintf(BD, "<p>Descripcion: "); //DESCRIPCION
-    fprintf(BD, pelicula->descripcion);
-    fprintf(BD, "</p> </article>");
-
-    fclose(BD);
-
+    int i=0;
+    while(str[i] != '\0')
+    {
+        if((str[i] < 'a' || str[i] > 'z') || (str[i] < 'A' || str[i] > 'Z') || (str[i] < '0' || str[i] > '9'))
+        {
+            return 1;
+        }
+        i++;
+    }
     system("cls");
-    printf("Pagina Web generada con exito. Encuentrela en el directorio de este programa\n\n\n");
+    printf("\n\n\n\t\t\t\t\t~El dato que ingreso esta vacio~\n\t\t\t\t\tSera redirijido al menu principal.\n\n\n\n");
     system("pause");
+    return 0;
+}
 
+void getString(char mensaje[],char input[])
+{
+    printf("%s",mensaje);
+    fflush(stdin);
+    gets(input);
+}
+
+int getStringLetras(char mensaje[],char input[])
+{
+    char aux[256];
+    getString(mensaje,aux);
+    if(esSoloLetras(aux))
+    {
+        strcpy(input,aux);
+        return 1;
+    }
+    return 0;
+}
+
+int esSoloLetras(char str[])
+{
+    int i=0;
+    while(str[i] != '\0')
+    {
+        if((str[i] != ' ') && (str[i] < 'a' || str[i] > 'z') && (str[i] < 'A' || str[i] > 'Z'))
+        {
+            return 0;
+        }
+        i++;
+    }
+    if(!noVoid(str))
+    {
+        return 0;
+    }
+    return 1;
+}
+
+int getStringNumeros(char mensaje[],char input[])
+{
+    char aux[256];
+    getString(mensaje,aux);
+    if(esNumerico(aux))
+    {
+        strcpy(input,aux);
+        return 1;
+    }
+    return 0;
+}
+
+int esNumerico(char str[])
+{
+    int i=0;
+    while(str[i] != '\0')
+    {
+        if((str[i] != ' ') && (str[i] < '0' || str[i] > '9'))
+        {
+            return 0;
+        }
+        i++;
+    }
+    if(!noVoid(str))
+    {
+        return 0;
+    }
+    return 1;
+}
+
+
+int esAlfaNumerico(char str[])
+{
+    int i=0;
+    while(str[i] != '\0')
+    {
+        if((str[i] != ' ') && (str[i] != '-') && (str[i] < 'a' || str[i] > 'z') && (str[i] < 'A' || str[i] > 'Z') && (str[i] < '0' || str[i] > '9'))
+        {
+            return 0;
+        }
+        i++;
+    }
+    if(!noVoid(str))
+    {
+        return 0;
+    }
+    return 1;
+}
+
+int getStringAlfaNumerico(char mensaje[],char input[])
+{
+    char aux[256];
+    getString(mensaje,aux);
+
+    if(esAlfaNumerico(aux))
+    {
+        strcpy(input,aux);
+        return 1;
+    }
+
+    return 0;
 }
 

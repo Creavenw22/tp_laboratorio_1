@@ -1,48 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <conio.h>
+#include <ctype.h>
 #include "funciones.h"
+#define MAX 20
 
 int main()
 {
+    system("color 0D");
+    int cantidadPeliculas=0;
     int opcion;
-    int salir = 0;
-    eMovie pelicula;
-    eMovie* auxPelicula;
+    char seguir='s';
+    EMovie movie[MAX];
 
-    auxPelicula = &pelicula;
+    while(seguir=='s')
+        {
+                menu(cantidadPeliculas);
+                scanf("%d",&opcion);
 
-    do
-    {
-        opcion = menu();
+                while(opcion<1 || opcion>5)
+                {
+                    printf("Error! Ingrese una opcion valida: ");
+                    scanf("%d",&opcion);
+                }
+
+                while(opcion>=2 && opcion<=4 &&cantidadPeliculas==0)
+                {
+                printf("No se puede ingresar esta opcion si tener peliculas cargadas, reingrese: ");
+                scanf("%d",&opcion);
+                }
 
         switch(opcion)
         {
         case 1:
-            altaPelicula(auxPelicula);
+            if(cargarPelicula(movie,MAX)==1)
+            {
+                printf("Pelicula cargada con exito!");
+                cantidadPeliculas++;
+            }
+            else
+            {
+                printf("No se pudo cargar la película!");
+            }
+            system("pause");
+            system("cls");
             break;
         case 2:
-            modPelicula(auxPelicula);
-
-            break;
+            borrarPelicula(movie,MAX);
+             break;
         case 3:
-            bajaPelicula(auxPelicula);
+            modificarPelicula(movie,MAX);
             break;
         case 4:
-            generaWeb(auxPelicula);
+            crearPagina(movie,cantidadPeliculas);
             break;
         case 5:
-            printf("\n\nHasta luego!\n\n");
-            system("pause");
-            salir = 1;
+            seguir = 'n';
             break;
-        default:
-            printf("Error, opcion no valida\n\n");
-            system("pause");
-            break;
-
         }
-    }while(salir == 0);
-
-
+    }
     return 0;
 }
